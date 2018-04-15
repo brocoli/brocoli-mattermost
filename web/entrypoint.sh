@@ -6,10 +6,10 @@ APP_PORT_NUMBER=${APP_PORT_NUMBER:-80}
 
 # Check if SSL should be enabled (if certificates exists)
 if [ -f "/cert/cert.pem" -a -f "/cert/key-no-password.pem" ]; then
-  echo "found certificate and key, linking ssl config"
+  echo "found certificate and key, linking ssl config" >> /proc/1/fd/1
   ssl="-ssl"
 else
-  echo "linking plain config"
+  echo "linking plain config" >> /proc/1/fd/1
 fi
 # Linking Nginx configuration file
 ln -s /etc/nginx/sites-available/mattermost$ssl /etc/nginx/conf.d/mattermost.conf
@@ -19,5 +19,5 @@ sed -i "s/{%APP_HOST%}/${APP_HOST}/g" /etc/nginx/conf.d/mattermost.conf
 sed -i "s/{%APP_PORT%}/${APP_PORT_NUMBER}/g" /etc/nginx/conf.d/mattermost.conf
 
 # Run Nginx
-echo "Running custom command '$@'"
+echo "Running custom command '$@'" >> /proc/1/fd/1
 exec "$@"

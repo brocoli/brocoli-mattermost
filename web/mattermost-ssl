@@ -11,10 +11,11 @@ map $http_x_forwarded_proto $proxy_x_forwarded_proto {
 
 server {
     listen 443 ssl http2;
+    server_name {%APP_DOMAIN%}
 
     ssl on;
-    ssl_certificate /cert/cert.pem;
-    ssl_certificate_key /cert/key-no-password.pem;
+    ssl_certificate /etc/letsencrypt/live/{%APP_DOMAIN%}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/{%APP_DOMAIN%}/privkey.pem;
     ssl_session_timeout 5m;
     ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
     ssl_ciphers HIGH:MEDIUM:!SSLv2:!PSK:!SRP:!ADH:!AECDH;

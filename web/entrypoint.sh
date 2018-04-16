@@ -1,24 +1,36 @@
 #!/bin/sh
 set -e
 
-# Define default value for app container hostname and port
-APP_HOST=${APP_HOST:-app}
-APP_PORT_NUMBER=${APP_PORT_NUMBER:-80}
+if [ "$@" = "nginx -g daemon off;" ]; then
+    # Linking non-ssl nginx configuration file
+    ln -s /etc/nginx/sites-available/mattermost /etc/nginx/conf.d/mattermost.conf
 
-# Check if SSL should be enabled (if certificates exists)
-if [ -f "/cert/cert.pem" -a -f "/cert/key-no-password.pem" ]; then
-  echo "found certificate and key, linking ssl config" >> /proc/1/fd/1
-  ssl="-ssl"
+    # Setup app host and port on configuration file
+    sed -i "s/{%APP_HOST%}/app/g" /etc/nginx/conf.d/mattermost.conf
+    sed -i "s/{%APP_PORT%}/80/g" /etc/nginx/conf.d/mattermost.conf
+
+    # Run Nginx
+    echo "Starting nginx with '$@' for pre-certbot setup" >> /proc/1/fd/1
+    exec "$@"
+
+    # Run certbot certonly.
+    # If your volume mounts are set up correctly this should only spend an ACME challenge
+    # when no valid certificates are found in "/etc/letsencrypt/live/${APP_DOMAIN}"
+    certbot -n -m julio.angelini@gmail.com --agree-tos -d "${APP_DOMAIN}" --nginx certonly
+
+    # Linking ssl nginx configuration file
+    rm /etc/nginx/conf.d/mattermost.conf
+    ln -s /etc/nginx/sites-available/mattermost-ssl /etc/nginx/conf.d/mattermost.conf
+
+    # Setup app host, port and domain on configuration file
+    sed -i "s/{%APP_HOST%}/app/g" /etc/nginx/conf.d/mattermost.conf
+    sed -i "s/{%APP_PORT%}/80/g" /etc/nginx/conf.d/mattermost.conf
+    sed -i "s/{%APP_HOST%}/${APP_DOMAIN}/g" /etc/nginx/conf.d/mattermost.conf
+
+    # Run Nginx
+    echo "Reloading nginx" >> /proc/1/fd/1
+    exec "/etc/init.d/nginx configtest && /etc/init.d/nginx reload"
 else
-  echo "linking plain config" >> /proc/1/fd/1
+    echo "Running custom command '$@'" >> /proc/1/fd/1
+    exec "$@"
 fi
-# Linking Nginx configuration file
-ln -s /etc/nginx/sites-available/mattermost$ssl /etc/nginx/conf.d/mattermost.conf
-
-# Setup app host and port on configuration file
-sed -i "s/{%APP_HOST%}/${APP_HOST}/g" /etc/nginx/conf.d/mattermost.conf
-sed -i "s/{%APP_PORT%}/${APP_PORT_NUMBER}/g" /etc/nginx/conf.d/mattermost.conf
-
-# Run Nginx
-echo "Running custom command '$@'" >> /proc/1/fd/1
-exec "$@"

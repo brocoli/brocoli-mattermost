@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # if wal-e backup is not enabled, use minimal wal-e logging to reduce disk space
 export WAL_LEVEL=${WAL_LEVEL:-minimal}

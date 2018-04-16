@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 
 # Define default value for app container hostname and port
 APP_HOST=${APP_HOST:-app}

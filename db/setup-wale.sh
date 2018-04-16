@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # wal-e specific configuration
 echo "wal_level = $WAL_LEVEL" >> $PGDATA/postgresql.conf

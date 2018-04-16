@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 
 # Function to generate a random salt
 generate_salt() {

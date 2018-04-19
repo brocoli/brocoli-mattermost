@@ -41,8 +41,8 @@
     "containerDefinitions": [
         {
             "name": "db",
-            "image": "mattermost/mattermost-prod-db:latest",
-            "memory": 128,
+            "image": "brocoli/mattermost-prod-db:1.0.0",
+            "memory": 256,
             "mountPoints": [
                 {
                     "sourceVolume": "db-data",
@@ -61,29 +61,13 @@
                 {
                     "name": "POSTGRES_DB",
                     "value": "mattermost"
-                },
-                {
-                    "name": "AWS_ACCESS_KEY_ID",
-                    "value": ""
-                },
-                {
-                    "name": "AWS_SECRET_ACCESS_KEY",
-                    "value": ""
-                },
-                {
-                    "name": "WALE_S3_PREFIX",
-                    "value": "t"
-                },
-                {
-                    "name": "AWS_REGION",
-                    "value": ""
                 }
             ]
         },
         {
             "name": "app",
-            "image": "brocoli/mattermost-prod-app:latest",
-            "memory": 128,
+            "image": "brocoli/mattermost-prod-app:1.0.0",
+            "memory": 1024,
             "mountPoints": [
                 {
                     "sourceVolume": "app-config",
@@ -104,13 +88,13 @@
         },
         {
             "name": "web",
-            "image": "brocoli/mattermost-prod-web-with-certbot:latest",
+            "image": "brocoli/mattermost-prod-web-with-certbot:1.0.0",
             "command": [
                 "nginx",
                 "-g",
                 "daemon off;"
             ],
-            "memory": 128,
+            "memory": 256,
             "mountPoints": [
                 {
                     "sourceVolume": "web-etc-letsencrypt",
@@ -124,7 +108,7 @@
             "environment": [
                 {
                     "name": "APP_DOMAIN",
-                    "value": "brocoli-mattermost.us-east-1.elasticbeanstalk.com"
+                    "value": "REPLACE_WITH_DOMAIN"
                 }
             ],
             "portMappings": [
